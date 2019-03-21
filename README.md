@@ -8,6 +8,8 @@ for each sample, which is how many lanes the illumina Nextseq has.
 **STEP 1:** Filter the reads, decontaminate the reads, and apply taxonomy. All of these answers
 youll find in the Full-fiber-basic.sh script
 
-**STEP 2:** Next i had to merge some files, like the metaphlan ones and the Midas outputs
+**STEP 2:** Next make a megahit directory and run the Fiber-script-2.sh
 
-**STEP 3:** Stats on those files, which are found in the Fiber_project.Rmd 
+* This will merge all the metaphlan and midas data, and make a cross-assembly w
+
+**STEP 3:** 

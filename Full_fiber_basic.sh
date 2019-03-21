@@ -71,14 +71,14 @@ export PATH=$PATH:/data/users/wengland/software/MIDAS/scripts
 
 run_midas.py species \
 ${MIDAS}${g} \
--d /bio/wengland/MIDAS-dbs/midas_db_v1.2 \
+-d /dfs3/bio/wengland/MIDAS-dbs/midas_db_v1.2 \
 -1 ${QUALITY}${g}_qc_decon_pe.1.fastq \
 -2 ${QUALITY}${g}_qc_decon_pe.2.fastq \
 -t 8 --remove_temp
 
 run_midas.py genes \
 ${MIDAS}${g} \
--d /bio/wengland/MIDAS-dbs/midas_db_v1.2 \
+-d /dfs3/bio/wengland/MIDAS-dbs/midas_db_v1.2 \
 -1 ${QUALITY}${g}_qc_decon_pe.1.fastq \
 -2 ${QUALITY}${g}_qc_decon_pe.2.fastq \
 -t 8 --remove_temp \
