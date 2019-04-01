@@ -27,9 +27,19 @@ export PYTHONPATH=$PYTHONPATH:/data/users/wengland/software/MIDAS
 export PATH=$PATH:/data/users/wengland/software/MIDAS/scripts
 
 cd ${BASEDIR}
+## Merge the species for MIDAS
+/data/users/wengland/software/python3/bin/python3 /data/users/wengland/software/MIDAS/scripts/merge_midas.py species \
+${MIDAS}MERGED \
+-i ${MIDAS} \
+-t dir \
+-d /dfs3/bio/wengland/MIDAS-dbs/midas_db_v1.2/
 
-merge_midas.py species ${MIDAS}MERGED -i ${MIDAS} -t dir
-merge_midas.py genes ${MIDAS}MERGED -i ${MIDAS} -t dir
+## Merge the genes for MIDAS
+/data/users/wengland/software/python3/bin/python3 /data/users/wengland/software/MIDAS/scripts/merge_midas.py genes \
+${MIDAS}MERGED \
+-i ${MIDAS} \
+-t dir \
+-d /dfs3/bio/wengland/MIDAS-dbs/midas_db_v1.2
 
 ## Assemble all the reads into contigs, a la how Dr. Alex Chase does it
 
