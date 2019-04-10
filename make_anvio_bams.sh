@@ -43,10 +43,10 @@ module load bowtie2/2.2.7
 module load samtools/1.3
 
 
-cd ${QUALITY}
+cd ${MERGED}
 
 bowtie2 -x ${ANVIO}contigs-fixed --very-fast-local -k 1 -t -p 4 --reorder --mm \
--U ${MERGED}${readgroup} | \
+-U ${readgroup} | \
 samtools view -S -bh -T ${CROSSASSEMBLY} - > ${ANVIO}${fiber}.bowtie2.bam
 
 " > ${ANVIO}/ap.${fiber}.sh
