@@ -46,7 +46,7 @@ module load samtools/1.3
 cd ${QUALITY}
 
 bowtie2 -x ${ANVIO}contigs-fixed --very-fast-local -k 1 -t -p 4 --reorder --mm \
--U ${readgroup} | \
+-U ${MERGED}${readgroup} | \
 samtools view -S -bh -T ${CROSSASSEMBLY} - > ${ANVIO}${fiber}.bowtie2.bam
 
 " > ${ANVIO}/ap.${fiber}.sh
