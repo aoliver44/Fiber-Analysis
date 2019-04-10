@@ -51,6 +51,7 @@ samtools view -S -bh -T ${CROSSASSEMBLY} - > ${ANVIO}${fiber}.bowtie2.bam
 
 " > ${ANVIO}/ap.${fiber}.sh
 
+qsub ${ANVIO}/ap.${fiber}.sh
+
 done < ${ANVIO}/sample_map.txt
 
-qsub ${ANVIO}/ap.${fiber}.sh
