@@ -231,7 +231,7 @@ write.csv(bray_distance_midas, file = "bray_distances.csv")
 write.csv(alpha_rare, file = "rarified_otu-table.csv")
 ```
 
-## Metaphlan
+## **Metaphlan**
 
 ```r
 
@@ -469,7 +469,7 @@ summary(fiber.lme)
 anova(fiber.lme) %>% kable(caption = "LME Intervention", booktabs = T) %>% kable_styling(position = "float_right", font_size = 16, latex_options = c("striped", "hold_position"))
 ```
 
-## PERMANOVA
+## **PERMANOVA**
 
 ```r
 permanova.input <- merge(metaphlan, Nutritional_Data, by.x= "row.names", by.y= "X__1")
@@ -492,8 +492,7 @@ anova(betadisper(d = as.dist(bray_distance_midas), permanova.input$`high-low fib
 
 ```
 
-
-## Beta Diveristy 
+## **Beta Diveristy**
 
 ```r
 
@@ -600,22 +599,31 @@ plot_grid(richness, shannon, evenness, ncol = 3, labels = "AUTO")
 
 ```
 
-##FUNGAL Analysis
+## FUNGAL Analysis
 
 ```r
-fungal_counts <- read.csv("all_fungal_counts.txt", check.names = FALSE, sep = "\t")
+library(ggplot2)
+library(readxl)
+setwd("/Users/andrewoliver/Google Drive File Stream/My Drive/Github/Fiber-Analysis")
+fungal_counts <- read.csv("Fungal_results.txt", check.names = FALSE, sep = "\t", header = FALSE)
+names(fungal_counts) <- c("sample", "taxa", "raw_reads", "norm_reads")
 
-fungal_counts$intervention <- factor(fungal_counts$intervention, levels = c('low','high'), ordered = TRUE)
+#add metadata
+Nutritional_Data <- read_excel("Nutritional_Data.xlsx", skip = 1)
+metadata <- dplyr::select(Nutritional_Data, X__1, individual, day, `high-low fiber`, fiber, carbs, percent_change)
+#merge with metadata
+fungal_presence <- merge(fungal_counts, metadata, by.x = "sample", by.y = "X__1")
+fungal_presence$intervention <- factor(fungal_presence$`high-low fiber`, levels = c('low','high'), ordered = TRUE)
 
 library(esquisse)
-esquisse::esquisser(fungal_counts)
+esquisse::esquisser(fungal_presence)
 
-ggplot(data = fungal_counts) +
-  aes(x = species, fill = intervention, weight = log2(normalized_reads), na.rm = TRUE) +
+ggplot(data = fungal_presence) +
+  aes(x = taxa, fill = intervention, weight = log2(norm_reads), na.rm = TRUE) +
   geom_bar(position = "dodge") +
   labs(y = 'log2(Normalized Read Counts)') +
   theme_classic() +
   facet_wrap(vars(individual)) + scale_fill_manual(values=c("deepskyblue3", "orange")) +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
 
 ```

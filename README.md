@@ -17,6 +17,6 @@ MIDAS data, find the section called Relative abundance Species.
 
 **STEP 2:** Next make a megahit directory and run the Fiber-script-2.sh
 
-* This will merge all the metaphlan and midas data, and make a cross-assembly with all the decontaminated reads.
+* This will merge all the metaphlan and midas data, and make a cross-assembly with all the decontaminated reads. 
 
 **STEP 3:** 
