@@ -49,12 +49,18 @@ module load Cluster_Defaults
 -z 12 \
 -v
 
-addTaxonNames -t /dfs3/bio/aoliver2/database/kaiju/kaijudb/nodes.dmp \
+/dfs3/bio/aoliver2/database/kaiju/bin/addTaxonNames \
+              -t /dfs3/bio/aoliver2/database/kaiju/kaijudb/nodes.dmp \
               -n /dfs3/bio/aoliver2/database/kaiju/kaijudb/names.dmp \
               -i gene_calls_nr.out \
               -o gene_calls_nr.names \
               -r superkingdom,phylum,order,class,family,genus,species
-              
+
+module load anaconda
+source activate anvio5
+
+module purge
+          
 anvi-import-taxonomy-for-genes -i gene_calls_nr.names \
                                -c contigs.db \
                                -p kaiju --just-do-it
