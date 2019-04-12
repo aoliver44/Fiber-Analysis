@@ -5,6 +5,18 @@
 #$ -R y
 #$ -ckpt restart
 
+## This script will run through a basic anvio analysis on the UCI HPC.
+## It assumes a couple things. You have a conda installation of anvio5
+## and its wonky such that you have to purge the modules every time
+## you activate it. Tighten up, UCI HPC.
+
+## Make you base anvio directory contain the contigs.db and run the script
+## from that location. You should also have a directory with all your bams
+## aligned to the contigs-fixed.fa (basically run megahit to get your contigs & 
+## anvi-script-reformat-fasta contigs.fa -o contigs-fixed.fa -l 1000 --simplify-names
+## to generate the fasta you will make your bowtie2 db out of...to create the bams).
+
+
 ANVIO=/dfs3/bio/aoliver2/fiber_metagenome/plus_new_data/anvio/
 
 module load anaconda
@@ -23,6 +35,10 @@ anvi-run-ncbi-cogs -c contigs.db --num-threads 12
 
 anvi-get-sequences-for-gene-calls -c contigs.db -o gene_calls.fa
 
+module load anaconda
+conda deactivate anvio5
+
+module load Cluster_Defaults
 
 ## Adding gene level taxonomy calls 
 /dfs3/bio/aoliver2/database/kaiju/bin/kaiju \
@@ -48,6 +64,10 @@ anvi-import-taxonomy-for-genes -i gene_calls_nr.names \
 
 cd ${ANVIO}bams
 
+module load anaconda
+source activate anvio5
+module purge
+
 for sample in *.bowtie2.bam; do
 newname=$(basename $sample .bowtie2.bam)
 anvi-init-bam ${sample} \
@@ -58,7 +78,7 @@ mkdir anvio_profiles
 
 for sample in *_init.bam; do
 name=$(basename $sample _init.bam)
-anvi-profile -i ${sample} -c contigs.db \
+anvi-profile -i ${sample} -c ${ANVIO}contigs.db \
 --skip-SNV-profiling \
 --min-contig-length 2000 \
 --sample-name ${name} \
