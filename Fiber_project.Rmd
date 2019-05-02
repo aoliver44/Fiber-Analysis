@@ -28,8 +28,13 @@ library(nlme)
 library(labdsv)
 library(knitr)
 library(kableExtra)
+library(ggtern)
 ```
 
+### Set working directory:
+```{r}
+setwd("~/Google Drive File Stream/My Drive/Github/Fiber-Analysis/")
+```
 ### Functions to load:
 
 ```{r}
@@ -92,7 +97,7 @@ Nutritional_Data <- read_excel("Nutritional_Data.xlsx", skip = 1)
 ## Make the numeric individual a factor
 Nutritional_Data$new_individ <- as.factor(Nutritional_Data$individual)
 
-Nutritional_Data$`high-low fiber` <- factor(Nutritional_Data$`high-low fiber`,
+Nutritional_Data$intervention <- factor(Nutritional_Data$`high-low fiber`,
                                             levels = c('low','high'),ordered = TRUE)
 
 #average fiber intake between high and low treatments
@@ -108,22 +113,22 @@ A <- ggplot(data = Nutritional_Data) +
 B <- ggplot(data = Nutritional_Data) +
   aes(x = Nutritional_Data$`high-low fiber`, y = protein, fill = `high-low fiber`) +
   geom_boxplot() +
-  theme_classic((base_size = 18)) + scale_fill_brewer(palette="Set2") + ggtitle("Protein") + xlab("") + ylab("Protein (grams)") + scale_fill_manual(values=c("deepskyblue3", "orange")) #+ stat_compare_means(method = "t.test")
+  theme_classic((base_size = 18)) + scale_fill_brewer(palette="Set2") + ggtitle("Protein") + xlab("") + ylab("Protein (grams)") + scale_fill_manual(values=c("deepskyblue3", "orange")) + stat_compare_means(method = "t.test")
 
 C <- ggplot(data = Nutritional_Data) +
   aes(x = Nutritional_Data$`high-low fiber`, y = carbs, fill = `high-low fiber`) +
   geom_boxplot() +
-  theme_classic((base_size = 18)) + scale_fill_brewer(palette="Set2") + ggtitle("Carbohydrates") + xlab("") + ylab("Carbs (grams)") + scale_fill_manual(values=c("deepskyblue3", "orange")) #+ stat_compare_means(method = "t.test")
+  theme_classic((base_size = 18)) + scale_fill_brewer(palette="Set2") + ggtitle("Carbohydrates") + xlab("") + ylab("Carbs (grams)") + scale_fill_manual(values=c("deepskyblue3", "orange")) + stat_compare_means(method = "t.test")
 
 E <- ggplot(data = Nutritional_Data) +
   aes(x = Nutritional_Data$`high-low fiber`, y = fat, fill = `high-low fiber`) +
   geom_boxplot() +
-  theme_classic((base_size = 18)) + scale_fill_brewer(palette="Set2") + ggtitle("Fat") + xlab("") + ylab("Fat (grams)") + scale_fill_manual(values=c("deepskyblue3", "orange")) #+ stat_compare_means(method = "t.test")
+  theme_classic((base_size = 18)) + scale_fill_brewer(palette="Set2") + ggtitle("Fat") + xlab("") + ylab("Fat (grams)") + scale_fill_manual(values=c("deepskyblue3", "orange")) + stat_compare_means(method = "t.test")
 
 D <- ggplot(data = Nutritional_Data) +
   aes(x = Nutritional_Data$`high-low fiber`, y = calories, fill = `high-low fiber`) +
   geom_boxplot() +
-  theme_classic((base_size = 18)) + scale_fill_brewer(palette="Set2") + ggtitle("Calories") + xlab("") + ylab("Calories (kcal)") + scale_fill_manual(values=c("deepskyblue3", "orange")) #+ stat_compare_means(method = "t.test")
+  theme_classic((base_size = 18)) + scale_fill_brewer(palette="Set2") + ggtitle("Calories") + xlab("") + ylab("Calories (kcal)") + scale_fill_manual(values=c("deepskyblue3", "orange")) + stat_compare_means(method = "t.test")
 
 plot_grid(A, B, C, E, D, ncol = 2, labels = "AUTO")
 #multiplot(A, B, C, E, D, cols=2)
@@ -156,6 +161,16 @@ J <- ggplot(data = subset(Nutritional_Data, subset = Nutritional_Data$new_indivi
   aes(x = `high-low fiber`, y = calories, fill = `high-low fiber`) +
   geom_boxplot() +
   theme_classic((base_size = 16)) + scale_fill_brewer(palette="Set2") + ggtitle("Calories") + xlab("") + ylab("Calories (kcal)")
+
+#########################################################################################
+
+# one of those triangle ternary plots
+
+p <- ggtern(Nutritional_Data, aes(protein, fat,carbs)) + 
+  geom_point(size = 4, alpha = 0.7,aes(colour = as.factor(Nutritional_Data$intervention)), show.legend = F) +
+  scale_color_manual(values = c("deepskyblue3", "orange")) + 
+  theme_minimal(base_size = 16) + limit_tern(T = 0.5, R = 0.85, L = 0.6) 
+
 
 
 ```
@@ -208,11 +223,11 @@ barplot(sort(rowSums(midas)), ylim = c(0, max(rowSums(midas))),
         xlim = c(0,NROW(midas)), col = "Orange")
 sort(rowSums(midas))
 
-## Alpha rarefaction to 980
+## Alpha rarefaction to 900
 
-midas_alpha_rare <- rrarefy.perm(midas, sample = 980, n = 10, round.out = T)
+midas_alpha_rare <- rrarefy.perm(midas, sample = 900, n = 10, round.out = T)
 
-alpha_rare <- midas_alpha_rare[rowSums(midas_alpha_rare) >= 980-(980*.1), colSums(midas_alpha_rare) >= 1]
+alpha_rare <- midas_alpha_rare[rowSums(midas_alpha_rare) >= 900-(900*.1), colSums(midas_alpha_rare) >= 1]
 sort(rowSums(alpha_rare))
 
 barplot(sort(rowSums(alpha_rare)), ylim = c(0, max(rowSums(alpha_rare))), 
@@ -220,7 +235,7 @@ barplot(sort(rowSums(alpha_rare)), ylim = c(0, max(rowSums(alpha_rare))),
 
 ## Beta rarefaction to 980
 
-midas_beta_rare <- avgdist(midas, sample = 980, iterations = 100, 
+midas_beta_rare <- avgdist(midas, sample = 1000, iterations = 50, 
                                               meanfun = median, dmethod = "bray")
 
 bray_distance_midas <- as.data.frame(as.matrix(midas_beta_rare))
@@ -229,6 +244,7 @@ bray_distance_midas <- as.data.frame(as.matrix(midas_beta_rare))
 setwd("~/Google Drive File Stream/My Drive/Class/M130L Fiber Study/Metagenomic_seq/midas/midas_take2/")
 write.csv(bray_distance_midas, file = "bray_distances.csv")
 write.csv(alpha_rare, file = "rarified_otu-table.csv")
+
 ```
 
 ## Metaphlan
@@ -236,8 +252,8 @@ write.csv(alpha_rare, file = "rarified_otu-table.csv")
 ```{r}
 
 # condense merged_metaphlan.txt into genus
-#library(shiny)
-#runGitHub("taxonomy_solution",username = "swandro")
+library(shiny)
+runGitHub("taxonomy_solution",username = "swandro")
 
 metaphlan <- read.csv("Condensed_metaphlan_table.tsv", row.names = 1, check.names = FALSE, sep = "\t")
 
@@ -263,7 +279,7 @@ comm_meta$intervention <- factor(comm_meta$`high-low fiber`, levels = c('low','h
 shannon <- ggplot(data = comm_meta) +
   aes(x = comm_meta$intervention, y = comm_meta$h, fill = intervention) +
   geom_boxplot(outlier.shape = NA) + geom_jitter(width = 0.2) +
-  theme_classic((base_size = 14)) + ggtitle("Alpha Diversity") + xlab("Intervention") + ylab("Shannon Diversity") + scale_fill_manual(values=c("deepskyblue3", "orange")) + stat_compare_means(method = "t.test", label.x.npc = .8)
+  theme_classic((base_size = 14)) + ggtitle("Alpha Diversity") + xlab("Intervention") + ylab("Shannon Diversity") + scale_fill_manual(values=c("deepskyblue3", "orange")) + stat_compare_means(method = "t.test", label.x.npc = .6)
 
 richness <- ggplot(data = comm_meta) +
   aes(x = comm_meta$intervention, y = comm_meta$richness, fill = intervention) +

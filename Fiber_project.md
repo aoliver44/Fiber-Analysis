@@ -135,7 +135,7 @@ plot_grid(A, B, C, E, D, ncol = 2, labels = "AUTO")
 F <- ggplot(data = subset(Nutritional_Data, subset = Nutritional_Data$new_individ == 5)) +
   aes(x = `high-low fiber`, y = fiber, fill = `high-low fiber`) +
   geom_boxplot() +
-  theme_classic((base_size = 16)) + scale_fill_brewer(palette="Set2") + ggtitle("Fiber") + xlab("") + ylab("Fiber (grams)") 
+  theme_classic((base_size = 16)) + scale_fill_brewer(palette="Set2") + ggtitle("Fiber") + xlab("") + ylab("Fiber (grams)")
 
 G <- ggplot(data = subset(Nutritional_Data, subset = Nutritional_Data$new_individ == 5)) +
   aes(x = `high-low fiber`, y = protein, fill = `high-low fiber`) +
@@ -247,8 +247,8 @@ viruses <- read.csv("virus_metaphlan.txt", row.names = 1, check.names = FALSE, s
 ```
 
 
-
 ## Alpha Diverisity
+
 ```r
 h <- diversity(alpha_rare, "shannon") 
 richness <- specnumber(alpha_rare)
@@ -346,10 +346,6 @@ anova(Eu.lme) %>% kable(caption = "LME Health Status", booktabs = T) %>% kable_s
 
 ```
 
-
-
-
-
 ## **SCFA Plotting**
 
 ```r
@@ -404,9 +400,6 @@ pdf("SCFA_all.pdf")
 plot_grid(A, P, IB, B, IV, V, ncol = 2, labels = "AUTO")
 dev.off()
 ```
-
-
-
 
 ## **PRES/ABSENCE**
 
@@ -529,7 +522,6 @@ nmds.plot.subset <- ggplot() +
 ggsave(filename = nmds_plot.pdf, plot = nmds.plot)
 
 ```
-
 
 ### 16S analysis
 

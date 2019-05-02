@@ -87,7 +87,7 @@ name=$(basename $sample _init.bam)
 anvi-profile -i ${sample} -c ${ANVIO}contigs.db \
 --skip-SNV-profiling \
 --min-contig-length 2000 \
---sample-name ${name} \
+--sample-name Individual_${name} \
 --output-dir ${ANVIO}bams/anvio_profiles
 done
 
