@@ -106,9 +106,9 @@ group_by(Nutritional_Data, `high-low fiber`) %>% summarise(avgFiber = mean(fiber
 ## FOR ALL THE SAMPLES (average across all of them)
 
 A <- ggplot(data = Nutritional_Data) +
-  aes(x = Nutritional_Data$`high-low fiber`, y = fiber, fill = `high-low fiber`) +
+  aes(x = Nutritional_Data$intervention, y = fiber, fill = intervention) +
   geom_boxplot() +
-  theme_classic((base_size = 18)) + scale_fill_brewer(palette="Set2") + ggtitle("Fiber") + xlab("") + ylab("Fiber (grams)") + scale_fill_manual(values=c("deepskyblue3", "orange")) + stat_compare_means(method = "t.test")
+  theme_classic((base_size = 18)) + ggtitle("Fiber") + xlab("") + ylab("Fiber (grams)") + scale_fill_manual(values=c("deepskyblue3", "orange")) + stat_compare_means(method = "t.test")
 
 B <- ggplot(data = Nutritional_Data) +
   aes(x = Nutritional_Data$`high-low fiber`, y = protein, fill = `high-low fiber`) +
@@ -166,7 +166,7 @@ J <- ggplot(data = subset(Nutritional_Data, subset = Nutritional_Data$new_indivi
 
 # one of those triangle ternary plots
 
-p <- ggtern(Nutritional_Data, aes(protein, fat,carbs)) + 
+tern <- ggtern(Nutritional_Data, aes(protein, fat,carbs)) + 
   geom_point(size = 4, alpha = 0.7,aes(colour = as.factor(Nutritional_Data$intervention)), show.legend = F) +
   scale_color_manual(values = c("deepskyblue3", "orange")) + 
   theme_minimal(base_size = 16) + limit_tern(T = 0.5, R = 0.85, L = 0.6) 
@@ -250,7 +250,7 @@ write.csv(alpha_rare, file = "rarified_otu-table.csv")
 ## Metaphlan
 
 ```{r}
-
+# NOT REALLY USING THIS ANYMORE. EVERYTHING IS MIDAS.
 # condense merged_metaphlan.txt into genus
 library(shiny)
 runGitHub("taxonomy_solution",username = "swandro")
@@ -299,10 +299,40 @@ plot_grid(richness, shannon, evenness, ncol = 3, labels = "AUTO")
 ## **Relative abundance Species**
 
 ```{r}
+# load in higher taxonomy data
+higher_tax <- read.csv("count_reads_taxonomy.txt", header = T, sep = "\t")[,1:8]
 #make sure you generate alpha_rare from above (rarefaction scripts)
 dat <- as.data.frame(alpha_rare)
 #make everything relative abundance
-comm <- decostand(dat, method = "total")
+comm <- t(decostand(dat, method = "total"))
+# merge with higher level taxonomy
+comm_higher_taxa <- merge(higher_tax, comm, by.x = "species_id", by.y = "row.names")
+#select out and group by family data (the next two lines pick out what level you want)
+comm_higher_taxa[,1:5] <- NULL
+comm_higher_taxa[,2:3] <- NULL
+# also taxa level change based on which one youre looking at
+comm_family <- group_by(comm_higher_taxa, family) %>% summarise_all(sum)
+family_order <-  comm_family[order(-rowMeans(comm_family[,2:88])), ]
+# This next step will introduce an error...in the family data there are
+# blank cells. I try and overwrite them but an NA gets generated. I guess
+# thats fine. CHECK WHERE THERE ARE BLANKS IF YOU CHANGE TAXONOMIC LEVEL!! 
+# You only have to really worry about the first 8 column names
+family_order[6,1] <- "Other"
+trans_family <- (t(family_order))
+colnames(trans_family) <- unlist(trans_family[1,])
+trans_family = as.data.frame(trans_family[-1, ])
+# Ok lets put that one back. Give her a name
+names(trans_family)[6]<-"no_name"
+# select top 8 features (basically the ones that show up the most). Why 8? 
+# because thats how many colorblind palette colors there are.
+family_collapse <- unite(trans_family, "Other", colnames(trans_family[8]):colnames(rev(trans_family)[1]), remove = TRUE)
+family_collapse$Other <- NULL
+write.csv(family_collapse, "tmp.txt")
+test <- read.csv("tmp.txt", header = T, stringsAsFactors = F, row.names = 1)
+test$low_abundant <- (1 - rowSums(test))
+bacteria <- as.list(colnames(test))
+
+
 # select top 8 features (basically the ones that show up the most). Why 8? 
 # because thats how many colorblind palette colors there are.
 comm_order <- comm[, order(-colMeans(comm))]
@@ -315,7 +345,7 @@ bacteria <- as.list(colnames(comm_collapse))
 Nutritional_Data <- read_excel("/Volumes/GoogleDrive/My Drive/Class/M130L Fiber Study/Metagenomic_seq/Primer/Nutritional_Data.xlsx", skip = 1)
 metadata <- dplyr::select(Nutritional_Data, X__1, individual, day, `high-low fiber`, fiber, carbs, percent_change)
 #merge with metadata
-comm_meta <- merge(comm_collapse, metadata, by.x = "row.names", by.y = "X__1")
+comm_meta <- merge(test, metadata, by.x = "row.names", by.y = "X__1")
 
 #melt the data
 comm_melted <- melt(comm_meta, id=c("individual", "day", "high-low fiber", "fiber", "carbs", "percent_change"), measure.vars = c(bacteria))
@@ -488,23 +518,44 @@ anova(fiber.lme) %>% kable(caption = "LME Intervention", booktabs = T) %>% kable
 ## PERMANOVA
 
 ```{r}
-permanova.input <- merge(metaphlan, Nutritional_Data, by.x= "row.names", by.y= "X__1")
-permanova.input.midas <- merge(alpha_rare, Nutritional_Data, by.x= "row.names", by.y= "X__1")
+higher_tax <- read.csv("count_reads_taxonomy.txt", header = T, sep = "\t")[,1:8]
+#make sure you generate alpha_rare from above (rarefaction scripts)
+dat <- as.data.frame(t(alpha_rare))
+# merge with higher level taxonomy
+comm_higher_taxa <- merge(higher_tax, dat, by.x = "species_id", by.y = "row.names")
+#select out and group by family data (the next two lines pick out what level you want)
+comm_higher_taxa[,1:5] <- NULL
+comm_higher_taxa[,2:3] <- NULL
+# also taxa level change based on which one youre looking at
+comm_family <- group_by(comm_higher_taxa, family) %>% summarise_all(sum)
+family_order <-  comm_family[order(-rowMeans(comm_family[,2:88])), ]
+# This next step will introduce an error...in the family data there are
+# blank cells. I try and overwrite them but an NA gets generated. I guess
+# thats fine. CHECK WHERE THERE ARE BLANKS IF YOU CHANGE TAXONOMIC LEVEL!! 
+# You only have to really worry about the first 8 column names
+family_order[6,1] <- "Other"
+trans_family <- (t(family_order))
+colnames(trans_family) <- unlist(trans_family[1,])
+trans_family = as.data.frame(trans_family[-1, ])
+# Ok lets put that one back. Give her a name
+names(trans_family)[6]<-"no_name"
+write.csv(trans_family, "tmp.txt")
+test <- read.csv("tmp.txt", header = T, stringsAsFactors = F, row.names = 1)
 
-intervention.perm <- adonis(permanova.input[,2:13] ~ permanova.input$`high-low fiber`, permutations = 9999, method = "bray", by = "terms", strata = as.character(permanova.input$individual)) 
+permanova.input <- merge(test, Nutritional_Data, by.x= "row.names", by.y= "X__1")
 
-individual.perm <- adonis(permanova.input[,2:13] ~ as.character(permanova.input$individual), permutations = 9999, method = "bray", by = "terms")
+intervention.perm <- adonis(permanova.input[,2:51] ~ permanova.input$`high-low fiber`, permutations = 9999, method = "bray", by = "terms", strata = as.character(permanova.input$individual)) 
 
+intervention.perm.nested <- adonis(permanova.input[,2:51] ~ as.character(permanova.input.midas$individual)/permanova.input$`high-low fiber`, permutations = 9999, method = "bray", by = "terms", strata = as.character(permanova.input$individual)) 
+
+## NOT REALLY DOING THIS ANYMORE
 ## THIS IS THE ONE!! DONT TOUCH. COPY.########################
 intervention.perm.midas <- adonis(permanova.input.midas[,2:367] ~ as.character(permanova.input.midas$individual)/permanova.input.midas$`high-low fiber`, permutations = 9999, method = "bray")
 ##########################################################################
 
 coef <- coefficients(intervention.perm)["permanova.input$`high-low fiber`1",]
 top.coef <- coef[rev(order(abs(coef)))[1:20]]
-barplot(sort(top.coef), horiz = T, las = 1, main = "Top taxa", col = "deepskyblue3", cex.axis=1.5, cex.names=1.5)
-
-anova(betadisper(d = as.dist(bray_distance_midas), permanova.input$`high-low fiber`))
-
+barplot(sort(top.coef), horiz = T, las = 1, main = "Top taxa", col = "deepskyblue3", cex.axis=1, cex.names=0.4)
 
 ```
 
