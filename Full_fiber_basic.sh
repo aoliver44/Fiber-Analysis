@@ -65,7 +65,7 @@ rm ${METAPHLAN}${g}_tmp.fastq
 
 # Midas analysis
 module purge
-module load enthought_python/7.3.2
+module load python/2.7.15
 export PYTHONPATH=$PYTHONPATH:/data/users/wengland/software/MIDAS
 export PATH=$PATH:/data/users/wengland/software/MIDAS/scripts
 

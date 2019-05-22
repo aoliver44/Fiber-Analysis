@@ -22,13 +22,13 @@ python /dfs3/bio/aoliver2/merge_metaphlan.py *.txt > merged_fiber_metaphlan.txt
 ## Clean and merge the midas data
 
 module purge
-module load enthought_python/7.3.2
+module load python/2.7.15
 export PYTHONPATH=$PYTHONPATH:/data/users/wengland/software/MIDAS
 export PATH=$PATH:/data/users/wengland/software/MIDAS/scripts
 
 cd ${BASEDIR}
 ## Merge the species for MIDAS
-/data/users/wengland/software/python3/bin/python3 /data/users/wengland/software/MIDAS/scripts/merge_midas.py species \
+merge_midas.py species \
 ${MIDAS}MERGED \
 -i ${MIDAS} \
 -t dir \

@@ -1,11 +1,14 @@
 ---
 title: "Fiber_project"
-output: html_document
+output:
+  html_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_chunk$set(eval = FALSE)
+knitr::opts_chunk$set(tidy.opts=list(width.cutoff=50),tidy=TRUE)
 ```
 
 ## R Markdown
@@ -34,54 +37,6 @@ library(ggtern)
 ### Set working directory:
 ```{r}
 setwd("~/Google Drive File Stream/My Drive/Github/Fiber-Analysis/")
-```
-### Functions to load:
-
-```{r}
-multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
-  library(grid)
-  
-  # Make a list from the ... arguments and plotlist
-  plots <- c(list(...), plotlist)
-  
-  numPlots = length(plots)
-  
-  # If layout is NULL, then use 'cols' to determine layout
-  if (is.null(layout)) {
-    # Make the panel
-    # ncol: Number of columns of plots
-    # nrow: Number of rows needed, calculated from # of cols
-    layout <- matrix(seq(1, cols * ceiling(numPlots/cols)),
-                     ncol = cols, nrow = ceiling(numPlots/cols))
-  }
-  
-  if (numPlots==1) {
-    print(plots[[1]])
-    
-  } else {
-    # Set up the page
-    grid.newpage()
-    pushViewport(viewport(layout = grid.layout(nrow(layout), ncol(layout))))
-    
-    # Make each plot, in the correct location
-    for (i in 1:numPlots) {
-      # Get the i,j matrix positions of the regions that contain this subplot
-      matchidx <- as.data.frame(which(layout == i, arr.ind = TRUE))
-      
-      print(plots[[i]], vp = viewport(layout.pos.row = matchidx$row,
-                                      layout.pos.col = matchidx$col))
-    }
-  }
-}
-```
-
-### Python env to load:
-
-```{r}
-# use_python("/Library/Frameworks/Python.framework/Versions/3.5/bin/python3", required = T)
-# py_config()
-# pd <- import("pandas")
-# sns <- import("seaborn")
 ```
 
 
@@ -308,10 +263,10 @@ comm <- t(decostand(dat, method = "total"))
 # merge with higher level taxonomy
 comm_higher_taxa <- merge(higher_tax, comm, by.x = "species_id", by.y = "row.names")
 #select out and group by family data (the next two lines pick out what level you want)
-comm_higher_taxa[,1:5] <- NULL
+comm_higher_taxa[,2:8] <- NULL
 comm_higher_taxa[,2:3] <- NULL
 # also taxa level change based on which one youre looking at
-comm_family <- group_by(comm_higher_taxa, family) %>% summarise_all(sum)
+comm_family <- group_by(comm_higher_taxa, species_id) %>% summarise_all(sum)
 family_order <-  comm_family[order(-rowMeans(comm_family[,2:88])), ]
 # This next step will introduce an error...in the family data there are
 # blank cells. I try and overwrite them but an NA gets generated. I guess
@@ -325,7 +280,7 @@ trans_family = as.data.frame(trans_family[-1, ])
 names(trans_family)[6]<-"no_name"
 # select top 8 features (basically the ones that show up the most). Why 8? 
 # because thats how many colorblind palette colors there are.
-family_collapse <- unite(trans_family, "Other", colnames(trans_family[8]):colnames(rev(trans_family)[1]), remove = TRUE)
+family_collapse <- unite(trans_family, "Other", colnames(trans_family[20]):colnames(rev(trans_family)[1]), remove = TRUE)
 family_collapse$Other <- NULL
 write.csv(family_collapse, "tmp.txt")
 test <- read.csv("tmp.txt", header = T, stringsAsFactors = F, row.names = 1)
@@ -333,16 +288,7 @@ test$low_abundant <- (1 - rowSums(test))
 bacteria <- as.list(colnames(test))
 
 
-# select top 8 features (basically the ones that show up the most). Why 8? 
-# because thats how many colorblind palette colors there are.
-comm_order <- comm[, order(-colMeans(comm))]
-comm_collapse <- unite(comm_order, "Other", colnames(comm_order[8]):colnames(rev(comm_order)[1]), remove = TRUE)
-comm_collapse$Other <- NULL
-comm_collapse$low_abundant <- (1 - rowSums(comm_collapse))
-bacteria <- as.list(colnames(comm_collapse))
-
 #add metadata
-Nutritional_Data <- read_excel("/Volumes/GoogleDrive/My Drive/Class/M130L Fiber Study/Metagenomic_seq/Primer/Nutritional_Data.xlsx", skip = 1)
 metadata <- dplyr::select(Nutritional_Data, X__1, individual, day, `high-low fiber`, fiber, carbs, percent_change)
 #merge with metadata
 comm_meta <- merge(test, metadata, by.x = "row.names", by.y = "X__1")
@@ -363,8 +309,17 @@ p <- ggplot(comm_melted, aes(day, y=value, fill = Taxonomy)) +
 
 p
 
-# Scatter plot of the biggest changers vs percent change in fiber
+# Scatter plot of the biggest changers vs fiber in grams
 ggscatter(comm_melted, x = "fiber", y = "value",
+          add = "reg.line", conf.int = TRUE, 
+          cor.coef = TRUE, cor.method = "pearson") + 
+          facet_wrap(.~ Taxonomy, scales = "free_y") + 
+          ylab("Relative abundance") +
+          theme_minimal(base_size = 16) + geom_jitter() +
+          xlab("Fiber (grams)")
+
+# Scatter plot of the Anaerostipes_hadrus_55206  vs fiber in grams
+ggscatter(subset(comm_melted, Taxonomy == "Anaerostipes_hadrus_55206"), x = "fiber", y = "value",
           add = "reg.line", conf.int = TRUE, 
           cor.coef = TRUE, cor.method = "pearson") + 
           facet_wrap(.~ Taxonomy, scales = "free_y") + 
@@ -684,5 +639,25 @@ ggplot(data = fungal_counts) +
   theme_classic() +
   facet_wrap(vars(individual)) + scale_fill_manual(values=c("deepskyblue3", "orange")) +
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+```
+
+## GH Analysis
+
+```{r}
+
+cazy <- read.csv("CAZY_classified_final.txt", check.names = F, header = F, sep = "\t")
+
+cazy_meta <- merge(cazy, Nutritional_Data, by.x = "V1", by.y = "X__1")
+
+ggplot(data = subset(cazy_meta, new_individ == "1")) + stat_compare_means(method = "t.test") +
+  aes(x = intervention, y = log2(V3)) +
+  geom_boxplot(aes(fill = intervention)) +
+  labs(title = 'Carbohydrate Active Enzymes',
+    x = 'Individual',
+    y = 'Normalized Gene Counts') +
+  theme_classic(base_size = 14) + theme(axis.text.x = element_text(angle = 90)) +
+  facet_wrap(vars(V4)) + scale_fill_manual(values=c("deepskyblue3", "orange"))
+
 
 ```
