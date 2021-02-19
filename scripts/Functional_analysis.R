@@ -5,7 +5,11 @@
 
 ## CAZY ###
 
-source("~/Google Drive File Stream/My Drive/Github/Fiber-Analysis/scripts/Generate_basic_env.R")
+# path should be set to data directory
+path <- getwd()
+setwd(path)
+source("../scripts/Generate_basic_env.R")
+
 library(reshape2)
 library(tidyverse)
 library(nlme)
@@ -13,6 +17,7 @@ library(ggplot2)
 library(ggpubr)
 library(knitr)
 library(kableExtra)
+
 
 # Import the cazy results and make into an OTU table
 cazy <- read.csv("CAZY_classified_final.txt", check.names = F, header = F, sep = "\t")
@@ -44,6 +49,43 @@ cazy_meta %>% group_by(., Individual, V4, Intervention, Metagenome) %>% summaris
        y = 'Mean normalized reads mapping to CAzy') +
   theme_bw() + theme(axis.text.x = element_text(angle = 90)) +
   facet_grid(. ~ V4) + scale_fill_manual(values=c("deepskyblue3", "orange"))
+
+# Or:
+cazy_meta %>% 
+  filter(., V4 == "Glycoside\nhydrolase" | V4 == "Polysaccharide\nlyase") %>%
+  group_by(., Individual, subclass, Intervention, Metagenome) %>% summarise(., totals = sum(V3)) %>% 
+  ggplot() + 
+  aes(x = subclass, y = log2(totals), fill = Intervention) +
+  geom_boxplot(aes(fill = Intervention), outlier.shape = NA) +
+  labs(title = 'Carbohydrate Active Enzymes',
+       x = '',
+       y = 'log2(Normalized reads mapping to CAzy)') +
+  theme_bw() + theme(axis.text.x = element_text(angle = 90)) + 
+  scale_fill_manual(values=c("deepskyblue3", "orange")) 
+
+# Kruskal wallis test on GHs and PLs across intervention
+KW_test <- cazy_meta %>% 
+  filter(., V4 == "Glycoside\nhydrolase" | V4 == "Polysaccharide\nlyase") %>%
+  group_by(., Individual, subclass, Intervention, Metagenome) %>% summarise(., totals = sum(V3)) %>% 
+  select(., Individual, Intervention, subclass, totals)
+KW_test$subclass <- as.factor(KW_test$subclass)
+gh_list <- levels(KW_test$subclass)
+gh_2_levels <- list()
+for (i in gh_list) { 
+  tmp <- subset(KW_test, KW_test$subclass == i)
+  if (length(as.numeric(unique(tmp$Intervention))) > 1) {
+    gh_2_levels <- append(gh_2_levels, i)
+  }
+}
+gh_pvalues <- data.frame()
+for (i in unlist(gh_2_levels)) { 
+  tmp <- subset(KW_test, KW_test$subclass == i)
+  tmp_test <- wilcox.test(tmp$totals ~ tmp$Intervention)
+  print(c(i, tmp_test$p.value))
+  df <- data.frame(i, tmp_test$statistic, tmp_test$p.value, tmp_test$method)
+  gh_pvalues <- rbind(gh_pvalues,df)
+}
+gh_pvalues$fdr_corrected <- p.adjust(gh_pvalues$tmp_test.p.value, method = "fdr")
 
 ## Table of the amount of enzymes and reads that were measured by class
 cazy_meta %>% group_by(., Intervention, V4) %>% 
@@ -135,7 +177,7 @@ anova(aov(as.numeric(Distinct_enzymes) ~ Intervention, data = GH_lme))
 
 # LME on broad cazy groups by Cazy "abundance"
 GH_lme <- cazy_meta %>% 
-  filter(., V4 == "Carbohydrate\nesterase") %>%
+  filter(., V4 == "Glycoside\nhydrolase") %>%
   group_by(., Individual, V4, Intervention, Metagenome) %>% summarise(., sum = sum(V3)) %>% 
   group_by(V4, Individual, Intervention) %>% summarise(Abundance = mean(sum))
 
@@ -196,7 +238,18 @@ all_scfa_melt %>%
   stat_summary(fun.data = give.n, geom = "text", fun.y = median, 
                                                             position = position_dodge(width = 0.75))
 
-
+  all_scfa_melt %>%
+    filter(., SCFA == "Butyrate") %>% 
+    group_by(., Individual, Intervention, enzyme_id) %>%
+    summarise(., total_norm_reads = mean(norm_reads)) %>% 
+    ggplot() + aes(Intervention, total_norm_reads) +
+    geom_boxplot(aes(fill = Intervention), outlier.alpha = 0) +
+    geom_jitter(width = 0.2, alpha = 0.4) +
+    scale_fill_brewer(palette = "Blues") +
+    facet_wrap(~enzyme_id, scales = "free") +
+    theme_bw() + labs(y = "Normalized Reads") + stat_summary(fun.data = give.n, geom = "text", fun.y = median, 
+               position = position_dodge(width = 0.2))  
+  
 # LME on different compounds:
 pathway_lme <- all_scfa_melt %>%
   group_by(., Individual, Intervention, SCFA) %>%
@@ -239,3 +292,40 @@ permanova_scfa <- all_scfa_melt %>%
 permanova_scfa_meta <- merge(metadata, permanova_scfa, by.x = "Metagenome", by.y = "sample_id")
 
 adonis(permanova_scfa_meta[,13:36] ~ Individual*Intervention, data = permanova_scfa_meta, permutations = 999, parallel = 4, method = "bray")
+
+
+########### HUMANN3 ##############
+library(data.table)
+library(vegan)
+library(tidyverse)
+humann_raw <- fread("~/Google Drive File Stream/My Drive/Fiber_project/humann_genefam_abund_join_nostrat_renorm_cpm_meta.txt", header = T)
+gene_sample_meta <- read.csv("humann_genes_meta.txt", sep = "\t", header = T)
+humann_reduced <- humann_raw[3:NROW(humann_raw), ]
+humann_reduced <- humann_reduced[rowSums(humann_reduced == 0) <= 27, ]
+humann_reduced <- humann_reduced %>% column_to_rownames(., "# Gene Family")
+humann_reduced[] <- lapply(humann_reduced, function(x) as.numeric(as.character(x)))
+
+humann_reduced <- t(humann_reduced)
+humann_bray <- vegdist(humann_reduced, method = "euclidean")
+permanvoa_gene_data <- merge(as.data.frame(as.matrix(humann_bray)), gene_sample_meta, by.x = "row.names", by.y = "Metagenome")
+adonis(dist(permanvoa_gene_data[,2:87]) ~ individual*intervention, data = permanvoa_gene_data)
+# vis of MDS of the data
+set.seed(seed = 999)
+beta.mds <- metaMDS(humann_reduced, distance="bray", k=2)
+stressplot(beta.mds)
+
+sites <- as.data.frame(scores(beta.mds, display = "sites"))
+species <- as.data.frame(scores(beta.mds, display = "species"))
+
+nmds.sites <- merge(sites, gene_sample_meta, by.x = "row.names", by.y = "Metagenome")
+
+colors_inset <- c("#863636", "#8ad747", "#6e41c8", "#dbcb57", "#cb4bc0", "#6bd183", "#562d6f", "#839243", "#6f79cf", "#cf843b", "#8ab6d6", "#d74b34", "#8dceb6", "#d04a76", "#3c613a", "#ca8abe", "#37242f", "#d4aa97", "#56697f", "#785837")
+colors_subset <- c("#863636","#8ad747","#6e41c8","#dbcb57","#cb4bc0","#6bd183","#562d6f","#839243", "#6f79cf","#cf843b","#8ab6d6","#d74b34","#8dceb6","#d04a76","#3c613a","#ca8abe","#37242f","#56697f","#785837")
+
+ggplot(data = nmds.sites, aes(NMDS1, NMDS2)) + 
+  geom_point(aes(color = as.factor(individual), size = 1, shape = as.factor(intervention)), alpha = 0.7) + 
+  theme_classic() + scale_size(range = c(0.2, 6)) + 
+  theme(axis.title = element_text(size = 20), axis.text = element_text(size = 18), 
+        legend.text = element_text(size = 20), legend.title = element_text(size = 20)) +
+  geom_text(data = nmds.sites, aes(label = individual), check_overlap = TRUE, size = 2.5) + theme(legend.position = "none") +
+  scale_color_manual(values = colors_inset) + scale_fill_manual(values = colors_inset) + coord_cartesian(ylim = c(-0.6,0.9))

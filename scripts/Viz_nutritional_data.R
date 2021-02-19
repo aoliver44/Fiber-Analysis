@@ -2,7 +2,11 @@
 ###### Viz Nutritional data ######
 ##################################
 
-source("~/Google Drive File Stream/My Drive/Github/Fiber-Analysis/scripts/Generate_basic_env.R")
+# path should be set to data directory
+path <- getwd()
+setwd(path)
+source("../scripts/Generate_basic_env.R")
+
 # Displaying the Nutritional data over time period of the 3 weeks. 
 # The resulting lmes are done over the 3 week period as well.
 

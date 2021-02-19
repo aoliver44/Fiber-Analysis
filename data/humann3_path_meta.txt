@@ -1,0 +1,30 @@
+pathway	SCFA	Organism	SCFA	metacyc
+P161-PWYa	acetylene degradation	Total	Acetate	acetylene degradation (anaerobic)
+P161-PWYb	acetylene degradation	g__Escherichia.s__Escherichia_coli	Acetate	acetylene degradation (anaerobic)
+P161-PWYc	acetylene degradation	unclassified	Acetate	acetylene degradation (anaerobic)
+P124-PWYa	Bifidobacterium shunt	Total	Multiple_pwys	Bifidobacterium shunt
+P124-PWYb	Bifidobacterium shunt	g__Bifidobacterium.s__Bifidobacterium_longum	Multiple_pwys	Bifidobacterium shunt
+P124-PWYc	Bifidobacterium shunt	g__Bifidobacterium.s__Bifidobacterium_pseudocatenulatum	Multiple_pwys	Bifidobacterium shunt
+P124-PWYd	Bifidobacterium shunt	g__Lactobacillus.s__Lactobacillus_fermentum	Multiple_pwys	Bifidobacterium shunt
+P124-PWYe	Bifidobacterium shunt	unclassified	Multiple_pwys	Bifidobacterium shunt
+P461-PWYa	hexitol fermentation tolactate,formate,ethanolandacetate	Total	Multiple_pwys	hexitol fermentation to lactate, formate, ethanol and acetate
+P461-PWYb	hexitolfermentationtolactate,formate,ethanolandacetate	g__Anaerostipes.s__Anaerostipes_hadrus	Multiple_pwys	hexitol fermentation to lactate, formate, ethanol and acetate
+P461-PWYc	hexitolfermentationtolactate,formate,ethanolandacetate	g__Escherichia.s__Escherichia_coli	Multiple_pwys	hexitol fermentation to lactate, formate, ethanol and acetate
+P461-PWYd	hexitolfermentationtolactate,formate,ethanolandacetate	g__Salmonella.s__Salmonella_enterica	Multiple_pwys	hexitol fermentation to lactate, formate, ethanol and acetate
+P461-PWYe	hexitolfermentationtolactate,formate,ethanolandacetate	unclassified	Multiple_pwys	hexitol fermentation to lactate, formate, ethanol and acetate
+PWY-5022a	4-aminobutanoatedegradationV	Total	Butyrate	4-aminobutanoate degradation V
+PWY-5022b	4-aminobutanoatedegradationV	g__Bacillus.s__Bacillus_intestinalis	Butyrate	4-aminobutanoate degradation V
+PWY-5676a	acetyl-CoAfermentationtobutanoateII	Total	Butyrate	acetyl-CoA fermentation to butanoate II
+PWY-5676b	acetyl-CoAfermentationtobutanoateII	g__Anaerostipes.s__Anaerostipes_hadrus	Butyrate	acetyl-CoA fermentation to butanoate II
+PWY-5676c	acetyl-CoAfermentationtobutanoateII	unclassified	Butyrate	acetyl-CoA fermentation to butanoate II
+CENTFERM-PWYa	pyruvatefermentationtobutanoate	Total	Butyrate	pyruvate fermentation to butanoate
+CENTFERM-PWYb	pyruvatefermentationtobutanoate	unclassified	Butyrate	pyruvate fermentation to butanoate
+P122-PWYa	heterolacticfermentation	Total	Lactate	heterolactic fermentation
+ANAEROFRUCAT-PWYa	homolacticfermentation	Total	Lactate	homolactic fermentation
+ANAEROFRUCAT-PWYb	homolacticfermentation	g__Staphylococcus.s__Staphylococcus_aureus	Lactate	homolactic fermentation
+ANAEROFRUCAT-PWYc	homolacticfermentation	unclassified	Lactate	homolactic fermentation
+PWY-7013a	L-1,2-propanedioldegradation	Total	Propionate	(S)-propane-1,2-diol degradation
+PWY-7013b	L-1,2-propanedioldegradation	g__Eubacterium.s__Eubacterium_hallii	Propionate	(S)-propane-1,2-diol degradation
+PWY-7013c	L-1,2-propanedioldegradation	g__Eubacterium.s__Eubacterium_hallii_CAG_12	Propionate	(S)-propane-1,2-diol degradation
+PWY-7013d	L-1,2-propanedioldegradation	g__Salmonella.s__Salmonella_enterica	Propionate	(S)-propane-1,2-diol degradation
+PWY-7013e	L-1,2-propanedioldegradation	unclassified	Propionate	(S)-propane-1,2-diol degradation

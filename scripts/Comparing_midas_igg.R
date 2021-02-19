@@ -1,5 +1,9 @@
 # comparing IGG and MIDAS
-setwd("~/Google Drive File Stream/My Drive/Github/Fiber-Analysis/data/")
+
+# path should be set to data directory
+path <- getwd()
+setwd(path)
+source("../scripts/Generate_basic_env.R")
 
 ##################################
 ###### Richness comparisons ######

@@ -2,6 +2,11 @@
 ########## SCFA Analysis ##########
 ###################################
 
+# path should be set to data directory
+path <- getwd()
+setwd(path)
+source("../scripts/Generate_basic_env.R")
+
 library(readxl)
 library(reshape2)
 library(tidyverse)

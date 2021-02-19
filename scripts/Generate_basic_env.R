@@ -2,7 +2,10 @@
 ###### Generate Basic Files ######
 ##################################
 
-setwd("~/Google Drive File Stream/My Drive/Github/Fiber-Analysis/data")
+# path should be set to data directory
+path <- ""
+setwd(path)
+
 set.seed(999)
 
 ## Read in sequence data, nutritional data/metadata, metabolite data

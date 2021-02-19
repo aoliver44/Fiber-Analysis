@@ -2,8 +2,10 @@
 ######## Alpha Diversity ########
 #################################
 
-source("~/Google Drive File Stream/My Drive/Github/Fiber-Analysis/scripts/Generate_basic_env.R")
-
+# path should be set to data directory
+path <- getwd()
+setwd(path)
+source("../scripts/Generate_basic_env.R")
 
 library(vegan)
 library(ggplot2)
