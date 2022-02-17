@@ -26,7 +26,7 @@ cluster_permanova <- adonis(beta_diversity_data[,13:NCOL(beta_diversity_data)] ~
 cluster_permanova
 
 ############## Coeffecients on L6 (Genus) #################################
-out_melted <- read.csv("~/Google Drive File Stream/My Drive/Github/Fiber-Analysis/data/taxonomy_melted.tsv", sep = "\t", header = T)
+out_melted <- read.csv("taxonomy_melted.tsv", sep = "\t", header = T)
 Genus_melted <- out_melted %>% filter(., L6 != "") %>% group_by(L6, variable) %>% summarise(genus_sum = sum(value))
 Genus_OTU <- dcast(Genus_melted, formula = variable ~ L6)
 rownames(Genus_OTU) <- Genus_OTU$variable
