@@ -3,8 +3,8 @@
 ##################################
 
 # path should be set to data directory
-path <- "/Volumes/GoogleDrive/My Drive/Github/Fiber-Analysis/data/"
-setwd(path)
+#path <- "/Volumes/GoogleDrive/My Drive/Github/Fiber-Analysis/data/"
+#setwd(path)
 
 set.seed(999)
 

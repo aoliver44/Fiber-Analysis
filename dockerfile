@@ -1,5 +1,6 @@
 
-FROM rocker/rstudio:3.4.4
+FROM rocker/rstudio:4.0.0
+#FROM rocker/rstudio:3.4.4
 
 ENV RENV_VERSION=0.9.3-106
 
